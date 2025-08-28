@@ -1,5 +1,12 @@
-from fastapi import FastAPI, Path, Body
+from fastapi import FastAPI, Path, Body, Query
 from pydantic import BaseModel
+from enum import Enum
+
+class Field(Enum):
+    id = "id"
+    name = "name"
+    price = "price"
+    count = "count"
 
 class Product(BaseModel):
     id:     int | None  = None
@@ -16,7 +23,17 @@ products = [
 app = FastAPI()
 
 @app.get("/products/")
-async def all():
+async def all(field: Field = Query(default=None)):
+    if field:
+        data = []
+        for p in products:
+            new = 0
+            if field is Field.id:    new = p.id
+            if field is Field.name:  new = p.name
+            if field is Field.price: new = p.price
+            if field is Field.count: new = p.count
+            data.append(new) 
+        return data
     return products
 
 @app.get("/products/{id}")
